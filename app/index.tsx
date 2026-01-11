@@ -1,28 +1,39 @@
-import { useRouter } from "expo-router";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import AppButton from "../components/app-button";
 import ReminderItem from "../components/reminder-item";
 import { theme } from "../constants/theme";
+import { useApp } from "../store/store";
 
-const DATA = [
-  { id: "1", title: "Meeting", time: "08:00" },
-  { id: "2", title: "Shopping", time: "14:00" },
-];
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { reminders } = useApp();
+  
+  
 
   return (
     <View style={styles.container}>
+         <Stack.Screen
+        options={{
+          title: "ReminderPlus",
+          headerRight: () => (
+            <Pressable onPress={() => router.push("/settings")}>
+              <Ionicons name="settings-outline" size={24} />
+            </Pressable>
+          ),
+        }}
+      />
       <Text style={styles.header}>ReminderPlus</Text>
 
       <FlatList
-        data={DATA}
+        data={reminders}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ReminderItem
             title={item.title}
-            time={item.time}
+            time={item.time.toLocaleString()}
             onPress={() => router.push("/details")}
           />
         )}

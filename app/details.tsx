@@ -1,33 +1,39 @@
-import { View, Text, StyleSheet } from "react-native";
+import * as SMS from "expo-sms";
+import { Share, Text, View } from "react-native";
 import AppButton from "../components/app-button";
-import { theme } from "../constants/theme";
+import { useApp } from "../store/store";
+import { useRouter } from "expo-router";
 
 export default function DetailsScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Shopping</Text>
-      <Text style={styles.time}>14:00</Text>
+  const { phone, smsText, deleteReminder } = useApp();
+  const router = useRouter();
 
-      <AppButton title="Send SMS" onPress={() => {}} />
-      <AppButton title="Share" variant="secondary" onPress={() => {}} />
-      <AppButton title="Delete" variant="danger" onPress={() => {}} />
+  async function sendSms() {
+    if (!(await SMS.isAvailableAsync())) {
+      alert("SMS not available");
+      return;
+    }
+    await SMS.sendSMSAsync(phone, smsText);
+  }
+
+  return (
+    <View style={{ padding: 16 }}>
+      <Text style={{ fontSize: 24 }}>Shopping</Text>
+
+      <AppButton title="Send SMS" onPress={sendSms} />
+      <AppButton
+        title="Share"
+        variant="secondary"
+        onPress={() => Share.share({ message: "Shopping reminder" })}
+      />
+      <AppButton
+        title="Delete"
+        variant="danger"
+        onPress={async () => {
+          await deleteReminder("1");
+          router.back();
+        }}
+      />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: theme.colors.background,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "700",
-  },
-  time: {
-    fontSize: 16,
-    color: theme.colors.muted,
-    marginBottom: 24,
-  },
-});
