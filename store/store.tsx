@@ -1,12 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useContext, useEffect, useState } from "react";
 import * as Crypto from 'expo-crypto';
-
-type Reminder = {
-  id: string;
-  title: string;
-  time: Date;
-};
+import type { Reminder } from "../types/types";
 
 type NewReminder = Omit<Reminder, "id">;
 
@@ -17,7 +12,8 @@ type AppState = {
 };
 
 type AppContextType = AppState & {
-  addReminder: (r: Reminder) => void;
+  addReminder: (r: NewReminder) => void;
+  editReminder: (id: string, r: NewReminder) => void;
   deleteReminder: (id: string) => void;
   updatePhone: (v: string) => void;
   updateSmsText: (v: string) => void;
@@ -63,6 +59,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ],
   }));
 
+  const editReminder = (id: string, r: NewReminder) =>
+    setState(s => ({
+      ...s,
+      reminders: s.reminders.map(reminder => reminder.id === id ? { ...reminder, ...r } : reminder),
+    }));
+
   const deleteReminder = (id: string) =>
     setState(s => ({
       ...s,
@@ -80,6 +82,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         ...state,
         addReminder,
+        editReminder,
         deleteReminder,
         updatePhone,
         updateSmsText,

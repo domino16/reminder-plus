@@ -1,25 +1,32 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import AppButton from "../components/app-button";
 import { theme } from "../constants/theme";
 import { useApp } from "../store/store";
+import { Reminder } from '@/types/types';
 
 
 export default function AddEditScreen() {
   const [title, setTitle] = useState<string>('');
-  const { addReminder } = useApp();
+  const { addReminder, editReminder } = useApp();
   const router = useRouter();
   const [date, setDate] = useState(new Date());
-  // const [dateTime, setDateTime] = useState(new Date());
   const [dateText, setDateText] = useState('Wybierz datę...');
   const [timeText, setTimeText] = useState('Wybierz godzinę...');
-  const [mode, setMode] = useState('date' as 'date' | 'time' | 'datetime');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const { reminderString } = useLocalSearchParams<{ reminderString: string }>();
+  const reminderItem = reminderString ? JSON.parse(reminderString) as Reminder : null;
+ 
+  if (reminderItem !== null && title === '') {
+    setTitle(reminderItem.title);
+    setDateText(new Date(reminderItem.time).toLocaleDateString());
+    setTimeText(new Date(reminderItem.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  }
 
-
+  
     const onChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate;
     setShowDatePicker(false);
@@ -37,13 +44,11 @@ export default function AddEditScreen() {
   };
 
  
-
-
   return (
 
     
     <View style={styles.container}>
-      <Text style={styles.header}>New reminder</Text>
+      <Text style={styles.header}>Nowe przypomnienie</Text>
       
       <TextInput
         placeholder="Title"
@@ -81,10 +86,15 @@ export default function AddEditScreen() {
         />
       )}
 
-      <AppButton
-        title="Save"
+{reminderItem === null ?
+      (<AppButton
+        title="Zapisz"
         onPress={() => {addReminder({title: title, time: date}); router.back();}}
-      />
+      />):
+       (<AppButton
+        title="Edytuj"
+        onPress={() => {editReminder(reminderItem.id,{title: title, time: date}); router.back();}}
+      />)}
 
     </View>
   );
