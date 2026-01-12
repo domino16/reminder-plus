@@ -18,6 +18,7 @@ export default function AddEditScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const { reminderString } = useLocalSearchParams<{ reminderString: string }>();
+  // Parametr z routingu – gdy edytujemy istniejące przypomnienie
   const reminderItem = reminderString ? JSON.parse(reminderString) as Reminder : null;
  
   if (reminderItem !== null && title === '') {
@@ -26,7 +27,7 @@ export default function AddEditScreen() {
     setTimeText(new Date(reminderItem.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   }
 
-  
+ // Obsługa zmiany daty lub godziny
     const onChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate;
     setShowDatePicker(false);
@@ -51,7 +52,8 @@ export default function AddEditScreen() {
       <Text style={styles.header}>Nowe przypomnienie</Text>
       
       <TextInput
-        placeholder="Title"
+        placeholder="Wpisz treść przypomnienia"
+        placeholderTextColor={theme.colors.text}
         value={title}
         onChangeText={(text: string) => setTitle(text)}
         style={styles.input}

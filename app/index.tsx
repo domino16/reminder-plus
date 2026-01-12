@@ -1,13 +1,13 @@
+import { Reminder } from "@/types/types";
 import { Ionicons } from "@expo/vector-icons";
+import * as Notifications from 'expo-notifications';
 import { Stack, useRouter } from "expo-router";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import AppButton from "../components/app-button";
 import ReminderItem from "../components/reminder-item";
 import { theme } from "../constants/theme";
 import { useApp } from "../store/store";
 import { formatterDate } from "../utilis/dateFormatter";
-import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
 
 
 export default function HomeScreen() {
@@ -17,20 +17,50 @@ export default function HomeScreen() {
   .filter(item => new Date(item.time) >= new Date())
   .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
-
+// Prośba o zgodę na powiadomienia
   async function requestPermissions() {
   const { status } = await Notifications.requestPermissionsAsync();
   if (status !== 'granted') {
     alert('Brak zgody na powiadomienia!');
   }
 }
-
+let test:Date
 if (Platform.OS === 'android') {
   Notifications.setNotificationChannelAsync('default', {
     name: 'default',
     importance: Notifications.AndroidImportance.MAX,
   });
 }
+
+requestPermissions();
+
+
+  // Zaplanowanie powiadomienia 3h wcześnie
+ async function scheduleReminderNotification(reminder: Reminder) {
+  const reminderTime = new Date(reminder.time).getTime();
+  const THREE_HOURS = 3 * 60 * 60 * 1000;
+  const notificationTime = reminderTime - THREE_HOURS;
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'ReminderPlus',
+      body: reminder.title,
+      data: {
+        reminderId: reminder.id,
+      },
+    },
+    trigger: {  type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: notificationTime}
+  });
+}
+
+ async function scheduleAllReminders(reminders: Reminder[]) {
+  for (const reminder of reminders) {
+    await scheduleReminderNotification(reminder);
+  }
+}
+
+scheduleAllReminders(filteredReminders);
 
   return (
     <View style={styles.container}>
@@ -62,6 +92,7 @@ if (Platform.OS === 'android') {
             onPress={() => router.push({ pathname: "/details", params: { reminderString: JSON.stringify(item) } })}
           />
         )}
+
       />
 
       <AppButton

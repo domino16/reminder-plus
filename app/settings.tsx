@@ -9,7 +9,7 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Numer telefon</Text>
-      <TextInput value={phone} onChangeText={updatePhone} style={styles.input} />
+      <TextInput placeholder="Wpisz numer telefonu" placeholderTextColor={theme.colors.text} value={phone} onChangeText={updatePhone} style={styles.input} />
 
       <Text style={styles.label}>Treść SMS</Text>
       <TextInput value={smsText} onChangeText={updateSmsText} style={styles.input} />
